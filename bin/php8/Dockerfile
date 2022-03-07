@@ -14,7 +14,7 @@ RUN apt-get -y update --fix-missing && \
 
 # Install useful tools and install important libaries
 RUN apt-get -y update && \
-    apt-get -y --no-install-recommends install nano wget \
+    apt-get -y --no-install-recommends install vim wget \
 dialog \
 libsqlite3-dev \
 libsqlite3-0 && \
@@ -26,7 +26,7 @@ libicu-dev && \
 build-essential \
 git \
 curl \
-libonig-dev && \ 
+libonig-dev && \
     apt-get -y --no-install-recommends install --fix-missing libcurl4 \
 libcurl4-openssl-dev \
 zip \
@@ -76,7 +76,13 @@ RUN docker-php-ext-install pdo_mysql && \
     docker-php-ext-install mbstring && \
     docker-php-ext-install gettext && \
     docker-php-ext-install calendar && \
-    docker-php-ext-install exif
+    docker-php-ext-install exif && \
+    docker-php-ext-install calendar && \
+    docker-php-ext-install bcmath && \
+    docker-php-ext-install soap && \
+    docker-php-ext-install xml
+
+RUN docker-php-ext-enable xml
 
 
 # Install Freetype 
@@ -88,8 +94,32 @@ libpng-dev && \
     docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg && \
     docker-php-ext-install gd
 
+RUN apt-get -y update && \
+    apt-get --no-install-recommends install -y libxslt1-dev && \
+    docker-php-ext-install xsl
+
 # Enable apache modules
 RUN a2enmod rewrite headers
+
+ENV NODE_VERSION 16.13.2
+RUN curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+
+ENV NVM_DIR /root/.nvm
+RUN . $NVM_DIR/nvm.sh && \
+    nvm install $NODE_VERSION && \
+    nvm alias default $NODE_VERSION && \
+    nvm use default
+
+ENV NODE_PATH $NVM_DIR/versions/node/v$NODE_VERSION/lib/node_modules
+ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
+
+RUN corepack enable
+
+# Install symfony cli
+RUN echo 'deb [trusted=yes] https://repo.symfony.com/apt/ /' | tee /etc/apt/sources.list.d/symfony-cli.list
+RUN apt-get -y update
+RUN apt-get install -y symfony-cli
+
 
 # Cleanup
 RUN rm -rf /usr/src/*
