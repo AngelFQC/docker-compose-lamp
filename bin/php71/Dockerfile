@@ -44,3 +44,13 @@ RUN docker-php-ext-install -j$(nproc) gd
 
 # Enable apache modules
 RUN a2enmod rewrite headers
+
+# Chash
+
+RUN git clone https://github.com/chamilo/chash && \
+    cd chash && \
+    git checkout 0.2.x && \
+    composer install && \
+    php -d phar.readonly=0 createPhar.php && \
+    chmod +x chash.phar && \
+    mv chash.phar /usr/local/bin/chash
