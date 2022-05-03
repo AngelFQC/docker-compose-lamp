@@ -1,25 +1,32 @@
-FROM php:7.1.20-apache
+#Quickfix - Basebox for PHP7.2 Library now uses Debian "10" Buster, superceeding #libcurl3, stretch is most compatible at this time whilst devs workout backport.
+#https://github.com/docker-library/php/issues/865
 
-RUN apt-get -y update --fix-missing
-RUN apt-get upgrade -y
+FROM php:7.2-apache-stretch
+
+#Surpresses debconf complaints of trying to install apt packages interactively
+#https://github.com/moby/moby/issues/4032#issuecomment-192327844
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get -y update --fix-missing --no-install-recommends
+RUN apt-get -y upgrade
 
 # Install useful tools
-RUN apt-get -y install apt-utils nano wget dialog
+RUN apt-get -yq install apt-utils nano wget dialog
 
 # Install important libraries
-RUN apt-get -y install --fix-missing apt-utils build-essential git curl libcurl3 libcurl3-dev zip
+RUN apt-get -y install --fix-missing apt-utils build-essential git curl libcurl3 libcurl3-dev zip openssl
 
 # Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Install xdebug
-RUN pecl install xdebug-2.5.0
+RUN pecl install xdebug-2.6.0
 RUN docker-php-ext-enable xdebug
 
 # Other PHP7 Extensions
 
 RUN apt-get -y install libmcrypt-dev
-RUN docker-php-ext-install mcrypt
 
 RUN apt-get -y install libsqlite3-dev libsqlite3-0 mysql-client
 RUN docker-php-ext-install pdo_mysql 
@@ -37,6 +44,7 @@ RUN apt-get -y install libicu-dev
 RUN docker-php-ext-install -j$(nproc) intl
 
 RUN docker-php-ext-install mbstring
+RUN docker-php-ext-install gettext
 
 RUN apt-get install -y libfreetype6-dev libjpeg62-turbo-dev libpng-dev
 RUN docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ 
