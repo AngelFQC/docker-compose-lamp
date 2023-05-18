@@ -3,21 +3,24 @@ version: "3"
 services:
   webserver:
     build: 
-      context: ./bin/php8
-    container_name: 'chamilo2-php8'
+      context: ./bin/php81
+    container_name: 'chamilo2-php81'
     ports:
       - "80:80"
-      - "443:443"
+      - "8080:8080"
     links: 
       - database
     volumes: 
-      - /var/www/chamilo2:/var/www/html
+      - /home/angelfqc/Proyectos/chamilo2x:/var/www/html
       - ./config/php/php.ini:/usr/local/etc/php/php.ini
       - ./config/vhosts:/etc/apache2/sites-enabled
       - ./logs/apache2:/var/log/apache2
+      - ./logs/xdebug:/var/log/xdebug
     environment:
       APACHE_DOCUMENT_ROOT: /var/www/html
       MYSQL_ROOT_PASSWORD: afqc
+      XDEBUG_CONFIG: "client_host=host.docker.internal remote_port=9003"
+      PHP_IDE_CONFIG: "serverName=chamilo2x"
     extra_hosts:
       - "host.docker.internal:host-gateway"
   database:

@@ -1,4 +1,4 @@
-FROM php:8.0.10-apache-buster
+FROM php:8.1-apache-buster
 
 # Surpresses debconf complaints of trying to install apt packages interactively
 # https://github.com/moby/moby/issues/4032#issuecomment-192327844
@@ -10,7 +10,6 @@ RUN apt-get -y update --fix-missing && \
     apt-get upgrade -y && \
     apt-get --no-install-recommends install -y apt-utils && \
     rm -rf /var/lib/apt/lists/*
-
 
 # Install useful tools and install important libaries
 RUN apt-get -y update && \
@@ -27,6 +26,7 @@ build-essential \
 git \
 curl \
 libonig-dev && \
+    apt-get install -y iputils-ping && \
     apt-get -y --no-install-recommends install --fix-missing libcurl4 \
 libcurl4-openssl-dev \
 zip \
@@ -35,12 +35,9 @@ openssl && \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Install xdebug
-RUN pecl install xdebug-3.0.0 && \
-    docker-php-ext-enable xdebug
-
-# Install redis
-RUN pecl install redis-5.3.3 && \
-    docker-php-ext-enable redis
+RUN pecl install xdebug-3.1.4 && \
+    docker-php-ext-enable xdebug && \
+    mkdir /var/log/xdebug
 
 # Install imagick
 RUN apt-get update && \
@@ -50,7 +47,7 @@ RUN apt-get update && \
 # Workarround until imagick is available in pecl with php8 support
 # Imagick Commit to install
 # https://github.com/Imagick/imagick
-ARG IMAGICK_COMMIT="132a11fd26675db9eb9f0e9a3e2887c161875206"
+ARG IMAGICK_COMMIT="661405abe21d12003207bc8eb0963fafc2c02ee4"
 
 RUN cd /usr/local/src && \
     git clone https://github.com/Imagick/imagick && \
@@ -70,7 +67,6 @@ RUN docker-php-ext-install pdo_mysql && \
     docker-php-ext-install pdo_sqlite && \
     docker-php-ext-install mysqli && \
     docker-php-ext-install curl && \
-    docker-php-ext-install tokenizer && \
     docker-php-ext-install zip && \
     docker-php-ext-install -j$(nproc) intl && \
     docker-php-ext-install mbstring && \
@@ -83,7 +79,6 @@ RUN docker-php-ext-install pdo_mysql && \
     docker-php-ext-install xml
 
 RUN docker-php-ext-enable xml
-
 
 # Install Freetype 
 RUN apt-get -y update && \
@@ -101,8 +96,8 @@ RUN apt-get -y update && \
 # Enable apache modules
 RUN a2enmod rewrite headers
 
-ENV NODE_VERSION 16.13.2
-RUN curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+ENV NODE_VERSION 18.16.0
+RUN curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
 
 ENV NVM_DIR /root/.nvm
 RUN . $NVM_DIR/nvm.sh && \
@@ -120,6 +115,7 @@ RUN echo 'deb [trusted=yes] https://repo.symfony.com/apt/ /' | tee /etc/apt/sour
 RUN apt-get -y update
 RUN apt-get install -y symfony-cli
 
+EXPOSE 8080
 
 # Cleanup
 RUN rm -rf /usr/src/*
