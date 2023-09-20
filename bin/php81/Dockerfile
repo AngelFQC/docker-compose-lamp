@@ -111,9 +111,7 @@ ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 RUN corepack enable
 
 # Install symfony cli
-RUN echo 'deb [trusted=yes] https://repo.symfony.com/apt/ /' | tee /etc/apt/sources.list.d/symfony-cli.list
-RUN apt-get -y update
-RUN apt-get install -y symfony-cli
+RUN curl -sS https://get.symfony.com/cli/installer | bash -s - --install-dir /usr/local/bin
 
 EXPOSE 8080
 
