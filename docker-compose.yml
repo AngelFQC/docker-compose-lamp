@@ -3,8 +3,8 @@ version: "3"
 services:
   webserver:
     build: 
-      context: ./bin/php72
-    container_name: 'chamilo1-php72'
+      context: ./bin/php74
+    container_name: 'chamilo1-php74'
     restart: 'always'
     ports:
       - "80:80"
@@ -12,12 +12,15 @@ services:
     links: 
       - database
     volumes: 
-      - /var/www/chamilo1:/var/www/html
+      - /home/angelfqc/Proyectos/chamilo111x:/var/www/html
       - ./config/php/php.ini:/usr/local/etc/php/php.ini
       - ./config/vhosts:/etc/apache2/sites-enabled
       - ./logs/apache2:/var/log/apache2
     environment:
       APACHE_DOCUMENT_ROOT: /var/www/html
+      XDEBUG_CONFIG: "client_host=host.docker.internal remote_port=9003"
+      PHP_IDE_CONFIG: "serverName=chamilo111x"
+      COMPOSER_PROCESS_TIMEOUT: 2000
     extra_hosts:
       - "host.docker.internal:host-gateway"
   database:
