@@ -3,16 +3,15 @@ version: "3"
 services:
   webserver:
     build: 
-      context: ./bin/php72
-    container_name: 'chamilo1-php72'
+      context: ./bin/php74
+    container_name: 'chamilo-icpna-php74'
     restart: 'always'
     ports:
-      - "80:80"
-      - "443:443"
+      - "80"
     links: 
       - database
     volumes: 
-      - /var/www/chamilo1:/var/www/html
+      - /home/angelfqc/Proyectos/chamilo-lms-icpna:/var/www/html
       - ./config/php/php.ini:/usr/local/etc/php/php.ini
       - ./config/vhosts:/etc/apache2/sites-enabled
       - ./logs/apache2:/var/log/apache2
@@ -23,15 +22,15 @@ services:
   database:
     build:
       context: "./bin/mariadb106"
-    container_name: 'chamilo1-mariadb106'
+    container_name: 'chamilo-icpna-mariadb106'
     restart: 'always'
     ports:
-      - "127.0.0.1:3306:3306"
+      - "3306"
     volumes: 
       - ./data/mysql:/var/lib/mysql
       - ./logs/mysql:/var/log/mysql
     environment:
       MYSQL_ROOT_PASSWORD: afqc
-      MYSQL_DATABASE: chamilo1
-      MYSQL_USER: chamilo1
-      MYSQL_PASSWORD: chamilo1
+      MYSQL_DATABASE: chamilo
+      MYSQL_USER: chamilo
+      MYSQL_PASSWORD: chamilo
