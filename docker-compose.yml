@@ -3,15 +3,18 @@ version: "3"
 services:
   webserver:
     build: 
-      context: ./bin/php81
-    container_name: 'chamilo2-php81'
+      context: ./bin/${PHPVERSION}
+    container_name: "chamilo2-${PHPVERSION}"
+    restart: 'always'
     ports:
-      - "80:80"
+      - "32771:80"
       - "8080:8080"
     links: 
       - database
     volumes: 
-      - /home/angelfqc/Proyectos/chamilo2x:/var/www/html
+      - /home/aquiroz/Dev/chamilo/2x:/var/www/html:rw
+      - /home/aquiroz/Dev/chamilo/settings-bundle:/var/www/settings-bundle
+      - /home/aquiroz/Dev/chamilo/google-map-form-type-bundle:/var/www/google-map-form-type-bundle
       - ./config/php/php.ini:/usr/local/etc/php/php.ini
       - ./config/vhosts:/etc/apache2/sites-enabled
       - ./logs/apache2:/var/log/apache2
@@ -19,7 +22,7 @@ services:
     environment:
       APACHE_DOCUMENT_ROOT: /var/www/html
       MYSQL_ROOT_PASSWORD: afqc
-      XDEBUG_CONFIG: "client_host=host.docker.internal remote_port=9003"
+      XDEBUG_CONFIG: "client_host=host.docker.internal remote_port=${XDEBUG_PORT}"
       PHP_IDE_CONFIG: "serverName=chamilo2x"
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -29,7 +32,7 @@ services:
     container_name: 'chamilo2-mariadb106'
     restart: 'always'
     ports:
-      - "127.0.0.1:3306:3306"
+      - "32769:3306"
     volumes: 
       - ./config/initdb:/docker-entrypoint-initdb.d
       - ./data/mysql:/var/lib/mysql
