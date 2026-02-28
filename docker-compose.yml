@@ -2,23 +2,26 @@ version: "3"
 
 services:
   webserver:
-    build: 
+    build:
       context: ./bin/${PHPVERSION}
     container_name: "chamilo2-${PHPVERSION}"
     restart: 'always'
     ports:
       - "32771:80"
-      - "8080:8080"
-    links: 
+      - "32772:80"
+      - "32773:80"
+    links:
       - database
-    volumes: 
+    volumes:
       - /home/aquiroz/Dev/chamilo/2x:/var/www/html:rw
       - /home/aquiroz/Dev/chamilo/settings-bundle:/var/www/settings-bundle
       - /home/aquiroz/Dev/chamilo/google-map-form-type-bundle:/var/www/google-map-form-type-bundle
+      - /home/aquiroz/Dev/OneupFlysystemBundle:/var/www/OneupFlysystemBundle
       - ./config/php/php.ini:/usr/local/etc/php/php.ini
       - ./config/vhosts:/etc/apache2/sites-enabled
       - ./logs/apache2:/var/log/apache2
       - ./logs/xdebug:/var/log/xdebug
+      - ./data/php/sessions:/var/lib/php/sessions
     environment:
       APACHE_DOCUMENT_ROOT: /var/www/html
       MYSQL_ROOT_PASSWORD: afqc
@@ -33,7 +36,7 @@ services:
     restart: 'always'
     ports:
       - "32769:3306"
-    volumes: 
+    volumes:
       - ./config/initdb:/docker-entrypoint-initdb.d
       - ./data/mysql:/var/lib/mysql
       - ./logs/mysql:/var/log/mysql
@@ -42,3 +45,31 @@ services:
       MYSQL_DATABASE: chamilo
       MYSQL_USER: chamilo
       MYSQL_PASSWORD: chamilo
+
+  openldap:
+    image: osixia/openldap:latest
+    container_name: openldap
+    environment:
+      LDAP_BASE_DN: "dc=example,dc=org"
+      LDAP_ORGANISATION: "Example Organization"
+      LDAP_DOMAIN: "example.org"
+      LDAP_ADMIN_PASSWORD: "admin"
+      LDAP_TLS: "false"             # deactivate TLS for the LDAP server
+    volumes:
+      - ./ldap/bootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/50-bootstrap.ldif
+    ports:
+      - "389:389"                   # default port for unsecured LDAP
+    command: --copy-service
+    restart: unless-stopped
+
+  phpldapadmin:
+    image: osixia/phpldapadmin:latest
+    container_name: phpldapadmin
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: openldap
+      PHPLDAPADMIN_HTTPS: "false"   # deactivate HTTPS
+    ports:
+      - "32775:80"
+    restart: unless-stopped
+    depends_on:
+      - openldap

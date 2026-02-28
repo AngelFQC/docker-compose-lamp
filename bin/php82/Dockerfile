@@ -1,8 +1,8 @@
-FROM php:8.2.1-apache-buster
+FROM php:8.2.1-apache-bullseye
 
 # Surpresses debconf complaints of trying to install apt packages interactively
 # https://github.com/moby/moby/issues/4032#issuecomment-192327844
- 
+
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Update
@@ -10,7 +10,6 @@ RUN apt-get -y update --fix-missing && \
     apt-get upgrade -y && \
     apt-get --no-install-recommends install -y apt-utils && \
     rm -rf /var/lib/apt/lists/*
-
 
 # Install useful tools and install important libaries
 RUN apt-get -y update && \
@@ -26,7 +25,7 @@ libicu-dev && \
 build-essential \
 git \
 curl \
-libonig-dev && \ 
+libonig-dev && \
     apt-get install -y iputils-ping && \
     apt-get -y --no-install-recommends install --fix-missing libcurl4 \
 libcurl4-openssl-dev \
@@ -34,6 +33,13 @@ zip \
 openssl && \
     rm -rf /var/lib/apt/lists/* && \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Install LDAP dependencies and extension
+RUN apt-get -y update && \
+    apt-get -y --no-install-recommends install libldap2-dev && \
+    docker-php-ext-configure ldap && \
+    docker-php-ext-install ldap && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install xdebug
 RUN pecl install xdebug-3.2.1 && \
@@ -80,7 +86,7 @@ RUN docker-php-ext-install pdo_mysql && \
 
 RUN docker-php-ext-enable xml
 
-# Install Freetype 
+# Install Freetype
 RUN apt-get -y update && \
     apt-get --no-install-recommends install -y libfreetype6-dev \
 libjpeg62-turbo-dev \
@@ -102,8 +108,8 @@ RUN a2enmod ssl && a2enmod rewrite
 # Enable apache modules
 RUN a2enmod rewrite headers
 
-ENV NODE_VERSION 18.16.0
-RUN curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+ENV NODE_VERSION 22.18.0
+RUN curl --silent -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 
 ENV NVM_DIR /root/.nvm
 RUN . $NVM_DIR/nvm.sh && \
@@ -116,9 +122,11 @@ ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 RUN corepack enable
 
+RUN yarn set version stable
+
 # Install symfony cli
-RUN curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | bash
-RUN apt install symfony-cli
+RUN curl -sS https://get.symfony.com/cli/installer | bash
+RUN mv /root/.symfony5/bin/symfony /usr/local/bin/symfony
 
 EXPOSE 8080
 
