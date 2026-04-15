@@ -10,6 +10,7 @@ services:
       - "32771:80"
       - "32772:80"
       - "32773:80"
+      - "8080:8080"
     links:
       - database
     volumes:
@@ -77,6 +78,7 @@ services:
   selenium:
     image: selenium/standalone-chrome:4.8
     container_name: chamilo2-selenium
+    restart: unless-stopped
     shm_size: 2g
     ports:
       - "4444:4444"
