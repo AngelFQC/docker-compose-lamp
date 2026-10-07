@@ -28,6 +28,10 @@ services:
       MYSQL_ROOT_PASSWORD: afqc
       XDEBUG_CONFIG: "client_host=host.docker.internal client_port=${XDEBUG_PORT}"
       PHP_IDE_CONFIG: "serverName=chamilo2x"
+      # Playwright's baseURL. The versioned playwright.config.ts falls back to
+      # http://my.chamilo.net, which does not resolve from here; the published
+      # port 32771 only answers on the host. Apache listens on 80 inside.
+      BASE_URL: http://localhost
     extra_hosts:
       - "host.docker.internal:host-gateway"
   database:
@@ -87,3 +91,14 @@ services:
       SE_NODE_MAX_SESSIONS: 3
     depends_on:
       - webserver
+
+  # Azure Blob Storage emulator, for testing the azureblob storage backend.
+  # Reachable from the webserver container as http://azurite:10000
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    container_name: chamilo2-azurite
+    restart: unless-stopped
+    ports:
+      - "10000:10000"
+    volumes:
+      - ./data/azurite:/data
