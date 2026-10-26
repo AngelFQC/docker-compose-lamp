@@ -1,4 +1,4 @@
-FROM php:8.3-apache-bookworm
+FROM php:8.2-apache-bookworm
 
 # Surpresses debconf complaints of trying to install apt packages interactively
 # https://github.com/moby/moby/issues/4032#issuecomment-192327844
@@ -122,39 +122,6 @@ ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 RUN corepack enable
 
 RUN yarn set version stable
-
-# Chromium's shared libraries, so the Playwright test suite can launch a browser.
-# Same set `npx playwright install-deps chromium` resolves on bookworm; without them the
-# bundled Chromium fails with "error while loading shared libraries: libnspr4.so", which
-# Playwright only surfaces as "browserType.launch: Target page, context or browser has been
-# closed". xvfb is included for the headed and UI modes; the suite itself runs headless.
-# The browser binaries are NOT installed here: they come from the project's own
-# node_modules via `npx playwright install chromium`, so their version tracks the repo
-# rather than this image.
-RUN apt-get -y update && \
-    apt-get -y --no-install-recommends install libasound2 \
-libatk-bridge2.0-0 \
-libatk1.0-0 \
-libatspi2.0-0 \
-libcairo2 \
-libcups2 \
-libdbus-1-3 \
-libdrm2 \
-libgbm1 \
-libglib2.0-0 \
-libnspr4 \
-libnss3 \
-libpango-1.0-0 \
-libx11-6 \
-libxcb1 \
-libxcomposite1 \
-libxdamage1 \
-libxext6 \
-libxfixes3 \
-libxkbcommon0 \
-libxrandr2 \
-xvfb && \
-    rm -rf /var/lib/apt/lists/*
 
 # Install symfony cli
 RUN curl -sS https://get.symfony.com/cli/installer | bash

@@ -3,8 +3,8 @@ version: "3"
 services:
   webserver:
     build:
-      context: ./bin/${PHPVERSION}
-    container_name: "chamilo2-${PHPVERSION}"
+      context: ./bin/php82
+    container_name: "chamilo2-php82"
     restart: 'always'
     ports:
       - "32771:80"
@@ -14,7 +14,7 @@ services:
     links:
       - database
     volumes:
-      - /home/aquiroz/Dev/chamilo/2x:/var/www/html:rw
+      - /home/aquiroz/Dev/chamilo/branch2x:/var/www/html:rw
       - /home/aquiroz/Dev/chamilo/settings-bundle:/var/www/settings-bundle
       - /home/aquiroz/Dev/chamilo/google-map-form-type-bundle:/var/www/google-map-form-type-bundle
       - /home/aquiroz/Dev/OneupFlysystemBundle:/var/www/OneupFlysystemBundle
@@ -28,10 +28,6 @@ services:
       MYSQL_ROOT_PASSWORD: afqc
       XDEBUG_CONFIG: "client_host=host.docker.internal client_port=${XDEBUG_PORT}"
       PHP_IDE_CONFIG: "serverName=chamilo2x"
-      # Playwright's baseURL. The versioned playwright.config.ts falls back to
-      # http://my.chamilo.net, which does not resolve from here; the published
-      # port 32771 only answers on the host. Apache listens on 80 inside.
-      BASE_URL: http://localhost
     extra_hosts:
       - "host.docker.internal:host-gateway"
   database:
